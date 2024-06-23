@@ -2,10 +2,17 @@ const chatService = require('../services/chatService');
 
 exports.handleChatRequest = async (req, res) => {
   const { message, model } = req.body;
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
   try {
-    const response = await chatService.getResponse(message, model);
-    res.json(response);
+    await chatService.streamResponse(message, model, (chunk) => {
+      res.write(`data: ${chunk}\n\n`);
+    });
+    res.end();
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.write(`event: error\ndata: ${error.message}\n\n`);
+    res.end();
   }
 };

@@ -1,28 +1,26 @@
-const { OpenAIApi, Configuration } = require('openai');
-const cohere = require('cohere-ai');
-
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
-
-exports.getResponse = async (message, model) => {
+// Implement streaming logic for OpenAI and Cohere
+exports.streamResponse = async (message, model, onData) => {
+  // Pseudo-code for streaming
   if (model === 'openai') {
     const response = await openai.createCompletion({
       model: 'text-davinci-003',
       prompt: message,
       max_tokens: 150,
+      stream: true,
     });
-    return response.data.choices[0].text;
+    response.on('data', (chunk) => {
+      onData(chunk.choices[0].text);
+    });
   } else if (model === 'cohere') {
     const response = await cohere.generate({
       model: 'large',
       prompt: message,
       max_tokens: 150,
-    }, {
-      headers: { 'Authorization': `Bearer ${process.env.COHERE_API_KEY}` }
+      stream: true,
     });
-    return response.body.generations[0].text;
+    response.on('data', (chunk) => {
+      onData(chunk.generations[0].text);
+    });
   } else {
     throw new Error('Unsupported model');
   }
