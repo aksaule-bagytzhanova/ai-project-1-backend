@@ -4,6 +4,9 @@
   "main": "index.js",
   "author": "aksaule-bagytzhanova <aksaule124026@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
   "dependencies": {
     "cohere-ai": "^7.10.6",
     "dotenv": "^16.4.5",
